@@ -35,7 +35,6 @@ exports.signIn = async (req, res) => {
 };
 
 exports.signUp = async (req, res) => {
-  // user enters a referral code
   const { email, password, referralcode } = req.body;
   let referredBy
 
@@ -48,13 +47,12 @@ exports.signUp = async (req, res) => {
     }
 
     // check for existence of input referralCode in user database
-    const validReferral = await User.findOne({ 
-      "purchasedProducts.referralCode": referralcode 
-    })
+    const validReferral = await User.findOne({ referralcode })
+    console.log(validReferral)
     if(!validReferral){
-      const error = new Error("Referral Does not")
-      error.statusCode
-      //
+      referredBy = "Unknown"
+      const error = new Error("Invalid Referral")
+      error.statusCode = 404
       throw error
     } else if(validReferral){
       // update referral count of user with this referralcode
@@ -64,7 +62,7 @@ exports.signUp = async (req, res) => {
       await user.save()
 
       // set the "referralCode" of anonymous user as current user's "referredBy"
-      referredBy = validReferral.purchasedProducts.referralCode
+      referredBy = validReferral.referralCode
     }
 
     // create random code for referral
@@ -74,14 +72,10 @@ exports.signUp = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create a new user in the database
-    const newUser = await User.create({ 
+    const user = new User({ 
       email, password: hashedPassword,  referralCode, referredBy
     });
-
-    // // Generate a JWT token
-    // // why boss??
-    // const token = jwt.sign({ userId: newUser._id }, 'your-secret-key', { expiresIn: 1800 });
-    // console.log('token',token)
+    const newUser = await user.save()
     res.status(201).json({ newUser, token, referralCode });
 
   } catch (error) {
