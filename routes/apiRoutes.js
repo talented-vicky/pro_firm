@@ -9,7 +9,7 @@ const router = express.Router();
 router.post('/product/add', productController.addProduct)
 
 // Protected route
-router.get('/protected', verifyToken, productController.getProducts);
+router.get('/protected', productController.getProducts);
 
 router.get('/products/:productId', verifyToken, productController.getOneProduct);
 

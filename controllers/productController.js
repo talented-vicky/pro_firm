@@ -45,8 +45,10 @@ exports.getProducts = async (req, res) => {
     try {
         const products = await Product.find()
         noData(products)
+        const totalProduct = await Product.find().countDocuments()
         res.status(200).json({
           message: "Successfully Fetched Products", 
+          qty: totalProduct,
           data: products
         });
 

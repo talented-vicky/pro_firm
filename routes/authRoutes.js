@@ -7,7 +7,12 @@ const authController = require('../controllers/authController');
 const User = require('../models/User')
 
 const router = express.Router();
+// backend developer ---
+router.get('/user/:userId', authController.getUser)
 
+router.get('/users', authController.getUsers)
+
+// USER
 router.post('/signup', [
     body('email')
         .isEmail()
