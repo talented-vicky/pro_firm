@@ -18,12 +18,18 @@ const userSchema = new mongoose.Schema(
     referralCode: { 
       type: String
     },
-    referredBy: { 
+    parentRef: { 
+      type: String,
+    },
+    grandRef: { 
+      type: String
+    },
+    greatRef: { 
       type: String
     },
     purchasedProducts: [
       {
-        type: mongoose.SchemaTypes.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'Product'
       }
     ]

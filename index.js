@@ -2,8 +2,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const authRoutes = require('./routes/authRoutes');
-const apiRoutes = require('./routes/apiRoutes');
+const authRoutes = require('./routes/auth');
+const apiRoutes = require('./routes/api');
 const cors = require('cors'); // Import the cors package
 require('dotenv').config();
 
@@ -29,19 +29,7 @@ app.listen(PORT, () => {
 });
 
 
-/*
--- a post request
-when "refer now" button is clicked (ensure the user clicking on this button
-is the same currrently logged in user) on the frontend, automatically 
-generate a link that can be shared with others, the userId of the current
-user should be saved and sent to backend too
+// 613 by 470 => reception
+// 926 by 113 => passage
 
-add referral field to user model and update this when a user signs up
-
-... to send
-user to the register page on the website again, but I should pass the 
-ID of the person the link belongs to to the backend
-
--- a post request
-Then, I pass the data to the frontend to store in the user model
-*/
+// REMEMBER TO ADD PROTECTION TO NECESSARY ROUTES

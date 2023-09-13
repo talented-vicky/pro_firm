@@ -1,11 +1,11 @@
-// backend/controllers/authController.js
-const User = require('../models/User');
+const User = require('../models/user');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 exports.getUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.userId)
+    // const user = await User.findById("64fcc9411decd6401d23ba21")
     if(!user){
       const error = new Error("Oops! User Not Found")
       error.statusCode = 404
@@ -71,7 +71,7 @@ exports.signIn = async (req, res) => {
 
 exports.signUp = async (req, res) => {
   const { email, password, referralCode } = req.body;
-  let referredBy
+  let parentRef, grandRef, greatRef;
 
   try {
     const existingUser = await User.findOne({ email });
@@ -81,30 +81,51 @@ exports.signUp = async (req, res) => {
       });
     }
 
-    // check for existence of input referralCode in user database
-    const validReferral = await User.findOne({ referralCode })
-    
+    const firstRef = await User.findOne({ referralCode })    
     // no referral entered in frontend
     if(referralCode == ""){
-      referredBy = "Unknown"
+      parentRef = "Unknown"
+      grandRef = "Unknown"
+      greatRef = "Unknown"
     }
 
     // referral not empty, but also not in database (i.e not a valid referral)
-    if(referralCode != "" && !validReferral){
+    if(referralCode != "" && !firstRef){
       const error = new Error("Invalid Referral")
       error.statusCode = 404
       throw error
     } 
     
     // referral found in database
-    else if(validReferral){
+    else if(firstRef){
+      // set "referralCode" of parent user as current user's "parentReferral"
+      parentRef = firstRef.referralCode
+      
+      // check database for the referral of parrent (first) referral
+      const nextRef = await User.findOne({ referralCode: firstRef.parentRef })
+      if(!nextRef){
+        grandRef = "Unknown"
+        greatRef = "Unknown"
+      } else if(nextRef){
+        grandRef = nextRef.referralCode
+        greatRef = "Unknown"
+
+        const finalRef = await User.findOne({ referralCode: nextRef.parentRef })
+        if(!finalRef){
+          greatRef = "Unknown"
+        } else if(finalRef){
+          greatRef = finalRef.referralCode
+        }
+      }
+
+      // check user if purchase has been made (by checking adding and
+      // then verifying payment implementation) before doing all of 
+      // the query below
       // update referral count of user with this referralcode
       const user = await User.findOneAndUpdate(
-        {_id: validReferral._id}, { $inc: { referralCount: 1 }}
+        {_id: firstRef._id}, { $inc: { referralCount: 1 }}
       )
       await user.save()
-      // set the "referralCode" of anonymous user as current user's "referredBy"
-      referredBy = validReferral.referralCode
     }
 
     // create random code for referral
@@ -115,10 +136,12 @@ exports.signUp = async (req, res) => {
 
     // Create a new user in the database
     const user = new User({ 
-      email, password: hashedPassword,  referralCode: referralcode, referredBy
+      email, password: hashedPassword,  referralCode: referralcode, 
+      parentRef, grandRef, greatRef
     });
     const newUser = await user.save()
     res.status(201).json({ 
+      message: "Successfully signed up",
       data: newUser, 
       referralCode: user.referralCode 
     });

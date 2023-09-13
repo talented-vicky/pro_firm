@@ -1,5 +1,5 @@
-const Product = require('../models/Product')
-const User = require('../models/User')
+const Product = require('../models/product')
+const User = require('../models/user')
 
 const noData = (data) => {
   if(!data){
@@ -29,6 +29,13 @@ exports.addProduct = async (req, res) => {
       productTotalIncome, purchaseLimit, referrals, productInfo1,
       productInfo2, productInfo3
     })
+
+    const existingProd = await Product.findOne({ productTitle })
+    if(existingProd){
+      return res.status(400).json({
+        message: "product with title already exists"
+      })
+    }
     const newProduct = await product.save() 
     res.status(200).json({
       message: "Successfully Added Product",
@@ -39,6 +46,28 @@ exports.addProduct = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 }
+
+exports.deleteProduct = async (req, res) => {
+  const { prodId } = req.params
+
+  try {
+    const product = await Product.findById(prodId)
+    noData(product)
+
+    prodInfo = {name: product.productTitle, id: product._id}
+    await Product.findByIdAndRemove(prodId)
+    await Product.save()
+
+    res.status(200).json({
+      message: "Successfully Deleted Product",
+      data: prodInfo
+    })
+  } catch (error) {
+    res.status(400).json({message: "Error Occured"})
+  }
+}
+
+
 
 // FETCHING PRODUCTS
 exports.getProducts = async (req, res) => {
@@ -234,3 +263,4 @@ exports.postTotalAmount = async (req, res) => {
     return res.status(500).json({ message: 'Error posting total amount.' });
   }
 };
+
