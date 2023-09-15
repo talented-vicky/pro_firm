@@ -16,7 +16,7 @@ router.delete('/product/delete/:prodId', productCtrl. deleteProduct)
 // Protected route for products
 router.get('/protected', productCtrl.getProducts);
 
-router.get('/products/:productId', verifyToken, productCtrl.getOneProduct);
+router.get('/products/:productId', productCtrl.getOneProduct);
 
 router.post('/', verifyToken, productCtrl.postPurchasedProducts)
 

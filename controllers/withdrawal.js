@@ -1,6 +1,8 @@
 const nodemailer = require('nodemailer');
 
 const User = require('../models/user')
+const Product = require('../models/product')
+
 
 exports.postWithdrawalDetails = async (req, res) => {
     const withdrawalData = req.body
@@ -37,47 +39,67 @@ exports.postWithdrawalDetails = async (req, res) => {
 
 exports.getProfits = async (req, res) => {
     try {
-        // const user = await User.findById(req.userId)
-        // const demo = await User.findById("65012f49674862d85782d14b")
-        const user = User.findById("65012f49674862d85782d14b")
-                .populate('purchasedProducts')
-        if(!user){
-            console.log("user not found")
-            return
-        }
-        const result = await user
-        console.log(`here ${result}`)
-        res.status(200).json({data: result})
-        
-        // .populate({
-        //     path: 'purchasedProduct',
-        //     // select: 'productPrice'
-        // })
-
-        // console.log(demo)
-        return
-
-        const { referralCode } = user
-        // check authentication
-
-        // const child = await User.findOne({ parentRef: referralCode }).populate('productPrice')
-        const child = await User.findOne({ referredBy: referralCode }).populate('purchasedProducts.productPrice')
-        // console.log("I found first person logged in user referred")
-        // console.log(child)
-        return 
-        const grandChild = await User.findOne({ grandRef: referralCode })
-        const greatChild = await User.findOne({ greatRef: referralCode })
-
         let firstPerc = 0
-        const ten = child.purchasedProducts.forEach(val => {
-            firstPerc += val.productPrice
-        })
-        const five = grandChild.purchasedProducts.reduce((total, current) => {
-            return secPerc + current.productPrice
-        }, init)
-        const two = greatChild.purchasedProducts.reduce(amount => {
-            lastPerc += amount.productPrice
-        })
+        let secPerc = 0
+        let lastPerc = 0
+        // const profitQuery = (user, sum) => {
+        //     if(user){
+        //         user.forEach(product => {
+        //             product.purchasedProducts.forEach(prod => {
+        //                 sum += prod.productPrice
+        //             })
+        //         })
+        //     }
+        // }
+        
+        // const user = await User.findById(req.userId).populate('purchasedProducts')
+        
+        const user = await User.findById("65012f49674862d85782d14b")
+                                .populate('purchasedProducts')
+        // check authentication
+        if(!user){
+            const error = new Error("User Not Found")
+            error.statusCode = 404
+            throw error
+        }
+        
+        const { referralCode } = user
+        
+        const child = await User.find({ parentRef: referralCode }).populate('purchasedProducts')
+        // profitQuery(child, firstPerc)
+        if(child){
+            child.forEach(product => {
+                product.purchasedProducts.forEach(prod => {
+                    firstPerc += prod.productPrice
+                })
+            })
+        }
+
+        const grandChild = await User.find({ grandRef: referralCode }).populate('purchasedProducts')
+        // profitQuery(grandChild, secPerc)
+        if(grandChild){
+            grandChild.forEach(product => {
+                product.purchasedProducts.forEach(prod => {
+                    secPerc += prod.productPrice
+                })
+            })
+        }
+        const greatChild = await User.find({ greatRef: referralCode }).populate('purchasedProducts')
+        // profitQuery(greatChild, lastPerc)
+        if(greatChild){
+            greatChild.forEach(product => {
+                product.purchasedProducts.forEach(prod => {
+                    lastPerc += prod.productPrice
+                })
+            })
+        }
+        
+        const profit = (firstPerc * 0.1) + (secPerc * 0.05) + (lastPerc * 0.02)
+        console.log(firstPerc, secPerc, lastPerc)
+        res.status(200).json({
+            message: "Successfully Gotten Profit",
+            data: profit
+        })       
    
     } catch (error) {
         res.status(500).json({ message: error.message })

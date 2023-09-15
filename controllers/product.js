@@ -145,6 +145,7 @@ exports.getPurchasedProducts = async (req, res) => {
   try {
     const user = await User.findById(req.userId);
     unAuthorized(user)
+
     res.status(200).json({
       message: "Successfully Fetched Purchased Producst",
       data: user.purchasedProducts
@@ -179,86 +180,6 @@ exports.postTotalAmount = async (req, res) => {
       });
     }
 
-  } catch (error) {
-    return res.status(500).json({ message: 'Error posting total amount.' });
-  }
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// added
-exports.getPurchasedProducts = async (req, res) => {
-  try {
-    // Get the user from authentication
-    const user = await User.findById(req.userId);
-    unAuthorized(user) 
-    res.status(200).json({
-      message: "Successfully Fetched Purchased Product",
-      data: user.purchasedProducts
-    });
-
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching purchased products' });
-  }
-}
-
-exports.postPurchasedProducts = async (req, res) => {
-  const { productTitle, productPrice, productCycle, productDailyIncome, 
-    productTotalIncome, purchaseLimit, referrals, now } = req.body;
-
-  try {
-    const user = await User.findById(req.userId); 
-    unAuthorized(user)
-
-    const product = new Product({
-      productTitle, productPrice, productCycle, productDailyIncome,
-      productTotalIncome, purchaseLimit: purchaseLimit - 1,
-      referrals, purchaseDate: now, totalIncome: productTotalIncome });
-
-    const newUser = user.purchasedProducts.push(product)
-    const result = await newUser.save()
-
-    res.status(201).json({ 
-      message: 'Successfully added product to user details',
-      data: result
-    });
-  } catch (error) {
-    res.status(500).json({ message: 'Error adding product to purchased' });
-  }
-}
-
-exports.postTotalAmount = async (req, res) => {
-  const { purchasedProduct, totalAmount } = req.body;  
-
-  try {
-    // Get the user from authentication
-    const user = await User.findById(req.userId);
-    unAuthorized(user) 
-
-    if (existingProductIndex !== -1) {
-      // Update the total income of the purchased product
-      user.purchasedProducts[existingProductIndex].totalIncome = totalAmount;      
-      // Save the updated user document
-      await user.save();
-
-      return res.status(200).json({ message: 'Total amount posted successfully.' });
-    } else {
-      return res.status(404).json({ message: 'Product not found in purchased products.' });
-    }
   } catch (error) {
     return res.status(500).json({ message: 'Error posting total amount.' });
   }
