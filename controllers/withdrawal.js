@@ -48,8 +48,8 @@ exports.getProfits = async (req, res) => {
                 return sum
             }
         }
-        // const user = await User.findById(req.userId).populate('purchasedProducts')
-        const user = await User.findById("65012f49674862d85782d14b").populate('purchasedProducts')
+        const user = await User.findById(req.userId).populate('purchasedProducts')
+        // const user = await User.findById("65012f49674862d85782d14b").populate('purchasedProducts')
         if(!user){
             const error = new Error("User Not Found")
             error.statusCode = 404

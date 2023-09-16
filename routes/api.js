@@ -14,13 +14,13 @@ router.delete('/product/delete/:prodId', productCtrl. deleteProduct)
 
 
 // Protected route for products
-router.get('/protected', productCtrl.getProducts);
+router.get('/products', productCtrl.getProducts);
 
 router.get('/products/:productId', productCtrl.getOneProduct);
 
-router.post('/', verifyToken, productCtrl.postPurchasedProducts)
+router.post('/products/:productId', productCtrl.postPurchaseProduct)
 
-router.get('/purchased', verifyToken, productCtrl.getPurchasedProducts)
+router.get('/products/purchased', verifyToken, productCtrl.getPurchasedProducts)
 
 router.post('/postTotalAmount', verifyToken, productCtrl.postTotalAmount);
 
@@ -34,7 +34,7 @@ router.get('/paystack/webhook', paymentCtrl.verifyPayment)
 
 
 // WITHDRAWAL
-router.post('/withdrawalRequest', verifyToken, withdrawalCtrl.postWithdrawalDetails)
+router.post('/withdrawal/request', verifyToken, withdrawalCtrl.postWithdrawalDetails)
 
 router.get('/withdrawal/profit', withdrawalCtrl.getProfits)
    

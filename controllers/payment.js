@@ -11,7 +11,7 @@ const paystack_public_key =  process.env.paystack_public_key
 exports.acceptPayment = async (req, res) => {
     try {
         const { email, amount } = req.body
-        const params = JSON.stringify({ "email": email, "amount": amount*100 })
+        const params = JSON.stringify({ "email": email, "amount": amount * 100 })
         
         const options = {
             hostname: 'api.paystack.co',
@@ -38,7 +38,7 @@ exports.acceptPayment = async (req, res) => {
             console.log(err)
             return res.status(400).json(err)
         })
-        // ---> the below will be sent
+        // ---> a response of this format below will be sent
         // {
         //     "status": true,
         //     "message": "Authorization URL created",
@@ -59,15 +59,16 @@ exports.acceptPayment = async (req, res) => {
 }
 
 exports.verifyPayment = async (req, res) => {
-    const { ref } = req.query
+    const { reference } = req.query
     try {
         const options = {
             hostname: 'api.paystack.co',
             port: 5000,
-            path: `/transaction/verify/${encodeURIComponent(ref)}`,
+            path: `/transaction/verify/${encodeURIComponent(reference)}`,
             method: 'GET',
             headers: { 
                 Authorization: paystack_public_key,
+                'content-type': 'application/json',
                 'cache-control': 'no-cache' 
             }
         }

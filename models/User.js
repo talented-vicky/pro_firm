@@ -27,6 +27,22 @@ const userSchema = new mongoose.Schema(
     greatRef: { 
       type: String
     },
+    purchasedDetails: [
+      {
+        title: { 
+          type: String,
+          required: true 
+        },
+        limit: { 
+          type: Number,
+          required: true 
+        },
+        date: {
+          type: Date, 
+          default: Date.now()
+        }
+      }
+    ],
     purchasedProducts: [
       {
         type: mongoose.Schema.Types.ObjectId,

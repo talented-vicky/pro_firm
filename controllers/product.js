@@ -101,41 +101,61 @@ exports.getOneProduct = async (req, res) => {
 };
 
 
-// BUYING PRODUCTS
-exports.postPurchasedProducts = async (req, res) => {
-  const { 
-    productId, productTitle, productPrice, productCycle, productDailyIncome, 
-    productTotalIncome, purchaseLimit, referrals, now } = req.body;
+
+// PURCHASING PRODUCTS
+exports.postPurchaseProduct = async (req, res) => {
+  const { productId } = req.params
 
   try {
-    const user = await User.findById(req.userId); 
+    // const user = await User.findById(req.userId).populate('purchasedProducts'); 
+    const user = await User.findById("65012f49674862d85782d14b").populate('purchasedProducts'); 
     unAuthorized(user)
     
-    const existingProductIndex = user.purchasedProducts.findIndex(
-      (productObj) => productObj.productId === productId
-    );
+    console.log(user)
 
-    let newUser;
-    if (existingProductIndex !== -1) {
-      // Increment purchase limit if it's not 0
-      console.log('product exists')
-      if (user.purchasedProducts[existingProductIndex].purchaseLimit !== 0) {
-        newUser = user.purchasedProducts[existingProductIndex].purchaseLimit -= 1;
-      }
-    } else if (purchaseLimit !== 0) { 
-      // If purchaseLimit is != 0, add the product to purchasedProducts array
-      const product = new Product({
-        productTitle, productPrice, productCycle, productDailyIncome,
-        productTotalIncome, purchaseLimit: purchaseLimit - 1, referrals, 
-        purchaseDate: now, totalIncome: productTotalIncome });
-      newUser = user.purchasedProducts.push(product)
+    const product = await Product.findById(productId)
+    if(!product){
+      const error = new Error("Product Not Found")
+      error.statusCode = 404
+      throw error
     }
-    const savedUser = await newUser.save()
 
-    res.status(201).json({ 
-      message: 'Successfully added product to user details',
-      data: savedUser
-    });
+    user.purchasedProducts.forEach(prod => {
+      console.log(prod)
+      // comment all other codes below this
+
+
+      if(prod._id !== productId){
+        // firs time user wants to purchase this product 
+        const existingProduct = {
+          title: prod.productTitle, limit: prod.purchaseLimit - 1,
+        }
+        user.purchasedDetails.push(existingProduct)
+        user.purchasedProducts.push(product)
+        // user.save()
+
+      } else if(prod._id == productId){
+        // user wants to purchase product again
+        user.purchasedDetails.forEach(p => {
+          if(p.title === product.productTitle){
+            if(p.limit == 0){
+              const error = new Error(`You can't purchase this product more than ${product.purchaseLimit} times`)
+              error.statusCode = 402
+              throw error
+            } else if(p.limit > 0){ p.limit -= 1 }
+          }
+        })
+        // user.save()
+      }
+    })
+    res.status(200).json({message: "done testing"})
+
+    // res.status(201).json({ 
+    //   message: 'Successfully added product to user details',
+    //   purchaseLimit: stuff,
+    //   data: savedUser
+    // });
+
   } catch (error) {
     res.status(500).json({ message: 'Error adding product to purchased' });
   }
@@ -143,13 +163,15 @@ exports.postPurchasedProducts = async (req, res) => {
 
 exports.getPurchasedProducts = async (req, res) => {
   try {
-    const user = await User.findById(req.userId);
+    const user = await User.findById(req.userId).populate('purchasedProducts');
     unAuthorized(user)
+    const { purchasedProducts } = user
 
     res.status(200).json({
       message: "Successfully Fetched Purchased Producst",
-      data: user.purchasedProducts
+      data: purchasedProducts
     });
+
   } catch (error) {
     res.status(500).json({ message: 'Error fetching purchased products' });
   }
@@ -184,4 +206,3 @@ exports.postTotalAmount = async (req, res) => {
     return res.status(500).json({ message: 'Error posting total amount.' });
   }
 };
-
