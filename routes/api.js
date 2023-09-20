@@ -20,7 +20,7 @@ router.get('/products/:productId', productCtrl.getOneProduct);
 
 router.post('/products/:productId', productCtrl.postPurchaseProduct)
 
-router.get('/products/purchased', verifyToken, productCtrl.getPurchasedProducts)
+router.get('/product/purchased', productCtrl.getPurchasedProducts)
 
 router.post('/postTotalAmount', verifyToken, productCtrl.postTotalAmount);
 

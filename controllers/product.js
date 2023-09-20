@@ -111,64 +111,91 @@ exports.postPurchaseProduct = async (req, res) => {
     const user = await User.findById("65012f49674862d85782d14b").populate('purchasedProducts'); 
     unAuthorized(user)
     
-    console.log(user)
-
     const product = await Product.findById(productId)
-    if(!product){
-      const error = new Error("Product Not Found")
-      error.statusCode = 404
-      throw error
+    noData(product)
+
+    const jsonResp = (msg) => {
+      res.status(200).json({ message: msg, data: product })
     }
 
-    user.purchasedProducts.forEach(prod => {
-      console.log(prod)
-      // comment all other codes below this
-
-
-      if(prod._id !== productId){
-        // firs time user wants to purchase this product 
-        const existingProduct = {
-          title: prod.productTitle, limit: prod.purchaseLimit - 1,
-        }
-        user.purchasedDetails.push(existingProduct)
-        user.purchasedProducts.push(product)
-        // user.save()
-
-      } else if(prod._id == productId){
-        // user wants to purchase product again
-        user.purchasedDetails.forEach(p => {
-          if(p.title === product.productTitle){
-            if(p.limit == 0){
-              const error = new Error(`You can't purchase this product more than ${product.purchaseLimit} times`)
-              error.statusCode = 402
-              throw error
-            } else if(p.limit > 0){ p.limit -= 1 }
-          }
-        })
-        // user.save()
+    // USER HAS *NOT* MADE ANY PURCHASE
+    if(user.purchasedProducts.length == 0){
+      const existingProduct = {
+        title: product.productTitle, limit: product.purchaseLimit - 1,
+        _id: product._id
       }
-    })
-    res.status(200).json({message: "done testing"})
+      user.purchasedDetails.push(existingProduct)
+      user.purchasedProducts.push(product)
+      
+      user.save()
+      return jsonResp("Successfully Purchased Your First Product")
+    }
 
-    // res.status(201).json({ 
-    //   message: 'Successfully added product to user details',
-    //   purchaseLimit: stuff,
-    //   data: savedUser
-    // });
+    // USER HAS MADE PURCHASE(S)
+    // case-1 user wants to purchase this product again
+    const prodFinder = arr => {
+      let ans;
+      for(let i = 0; i < arr.length; i++){
+        // only one object will match in the end, hence returned
+        if(arr[i]._id.toString() === productId){ ans = arr[i] }
+      }
+      return ans
+    }
+    
+    const init = prodFinder(user.purchasedProducts)
+    if(init){
+      // we'll only reach here if the id already exists
+      const ress = prodFinder(user.purchasedDetails)
+      if(ress.limit == 0){
+        const error = new Error(`You can't purchase this product more than ${product.purchaseLimit} times`)
+        error.statusCode = 402
+        throw error
+      }
+      await User.findOneAndUpdate(
+        { _id: user._id, 'purchasedDetails._id': product._id},
+        { $inc: { 'purchasedDetails.$.limit': -1 }},
+        { returnOriginal: false }
+      )
+      await user.save()
+      return jsonResp("Successfully Purchased Product Again")
+    }
 
+    // we'd reach here if productId isn't already in purchasedProducts
+    // // case-2 first time user wants to purchase this product 
+    user.purchasedProducts.push(product)
+    // case-1 first time user wants to purchase this product 
+    const existingProduct = {
+      title: product.productTitle, limit: product.purchaseLimit - 1,
+      _id: product._id
+    }
+    user.purchasedDetails.push(existingProduct)
+    user.save()
+    return jsonResp("Successfully Purchased Product")
+    
+    
   } catch (error) {
-    res.status(500).json({ message: 'Error adding product to purchased' });
+    res.status(500).json({ 
+      message: 'Error adding product to purchased',
+      info: error.message 
+    });
   }
 }
 
 exports.getPurchasedProducts = async (req, res) => {
   try {
     const user = await User.findById(req.userId).populate('purchasedProducts');
+    // const user = await User.findById("650132d3b3e8a691e7fc0eb6").populate('purchasedProducts');
     unAuthorized(user)
     const { purchasedProducts } = user
 
+    if(purchasedProducts.length == 0){
+      return res.status(200).json({
+        message: "You have NO Purchased Product Yet",
+        data: purchasedProducts
+      });
+    }
     res.status(200).json({
-      message: "Successfully Fetched Purchased Producst",
+      message: "Successfully Fetched Purchased Products",
       data: purchasedProducts
     });
 
