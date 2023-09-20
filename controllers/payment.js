@@ -80,8 +80,12 @@ exports.verifyPayment = async (req, res) => {
             throw error
         }
 
-        // now updata referral count
-        // check if this users referred by1 is
+        // now updata referral count        
+        // update referral count of user with this referralcode
+        const user = await User.findOneAndUpdate(
+            {_id: firstRef._id}, { $inc: { referralCount: 1 }}
+        )
+        await user.save()
 
         const value = request.data
         return res.statsu(200).json(value)

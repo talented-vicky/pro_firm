@@ -107,8 +107,8 @@ exports.postPurchaseProduct = async (req, res) => {
   const { productId } = req.params
 
   try {
-    // const user = await User.findById(req.userId).populate('purchasedProducts'); 
-    const user = await User.findById("65012f49674862d85782d14b").populate('purchasedProducts'); 
+    const user = await User.findById(req.userId).populate('purchasedProducts'); 
+    // const user = await User.findById("65012f49674862d85782d14b").populate('purchasedProducts'); 
     unAuthorized(user)
     
     const product = await Product.findById(productId)

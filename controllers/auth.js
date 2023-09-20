@@ -117,15 +117,6 @@ exports.signUp = async (req, res) => {
           greatRef = finalRef.referralCode
         }
       }
-
-      // check user if purchase has been made (by checking adding and
-      // then verifying payment implementation) before doing all of 
-      // the query below
-      // update referral count of user with this referralcode
-      const user = await User.findOneAndUpdate(
-        {_id: firstRef._id}, { $inc: { referralCount: 1 }}
-      )
-      await user.save()
     }
 
     // create random code for referral
