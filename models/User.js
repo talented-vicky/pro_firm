@@ -37,6 +37,10 @@ const userSchema = new mongoose.Schema(
           type: Number,
           required: true 
         },
+        amount: { 
+          type: Number,
+          default: 0
+        },
         date: {
           type: Date, 
           default: Date.now()

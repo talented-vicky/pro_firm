@@ -7,36 +7,33 @@ const verifyToken = require('../middleware/auth');
 
 const router = express.Router();
 
-// just for backend route
-router.post('/product/add', productCtrl.addProduct)
-
-router.delete('/product/delete/:prodId', productCtrl. deleteProduct)
-
 
 // Protected route for products
 router.get('/products', productCtrl.getProducts);
 
-router.get('/products/:productId', productCtrl.getOneProduct);
+router.get('/products/:productId', verifyToken, productCtrl.getOneProduct);
 
 router.post('/products/:productId', productCtrl.postPurchaseProduct)
 
-router.get('/product/purchased', productCtrl.getPurchasedProducts)
+router.get('/product/purchased', verifyToken, productCtrl.getPurchasedProducts)
 
-router.post('/postTotalAmount', verifyToken, productCtrl.postTotalAmount);
+router.post('/product/totalamount', verifyToken, productCtrl.postTotalAmount);
 
 
 // PAYSTACK PAYMENT 
-router.post('/paystack/accept', paymentCtrl.acceptPayment)
+router.post('/paystack/init/payment', verifyToken, paymentCtrl.acceptPayment)
 
-router.get('/paystack/verify/?reference', paymentCtrl.verifyPayment)
+router.post('/paystack/accept', verifyToken, paymentCtrl.acceptPayment)
 
-router.get('/paystack/webhook', paymentCtrl.verifyPayment)
+router.get('/paystack/verify/?reference', verifyToken, paymentCtrl.verifyPayment)
+
+router.get('/paystack/webhook', verifyToken, paymentCtrl.webhook)
 
 
 // WITHDRAWAL
 router.post('/withdrawal/request', verifyToken, withdrawalCtrl.postWithdrawalDetails)
 
-router.get('/withdrawal/profit', withdrawalCtrl.getProfits)
+router.get('/withdrawal/profit', verifyToken, withdrawalCtrl.getProfits)
    
 
 module.exports = router;

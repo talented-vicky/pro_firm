@@ -1,6 +1,8 @@
 const Product = require('../models/product')
 const User = require('../models/user')
 
+
+// REUSABLE FUNCTIONS
 const noData = (data) => {
   if(!data){
     const error = new Error("Product Not Found")
@@ -16,57 +18,6 @@ const unAuthorized = (user) => {
     throw error
   }
 }
-
-// EXTRA CONTROLLER --backend developer--
-exports.addProduct = async (req, res) => {
-  const { productTitle, productPrice, productCycle, productDailyIncome, 
-    productTotalIncome, purchaseLimit, referrals, productInfo1,
-    productInfo2, productInfo3 } = req.body;
-    
-  try {
-    const product = new Product({
-      productTitle, productPrice, productCycle, productDailyIncome, 
-      productTotalIncome, purchaseLimit, referrals, productInfo1,
-      productInfo2, productInfo3
-    })
-
-    const existingProd = await Product.findOne({ productTitle })
-    if(existingProd){
-      return res.status(400).json({
-        message: "product with title already exists"
-      })
-    }
-    const newProduct = await product.save() 
-    res.status(200).json({
-      message: "Successfully Added Product",
-      data: newProduct
-    })
-
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-}
-
-exports.deleteProduct = async (req, res) => {
-  const { prodId } = req.params
-
-  try {
-    const product = await Product.findById(prodId)
-    noData(product)
-
-    prodInfo = {name: product.productTitle, id: product._id}
-    await Product.findByIdAndRemove(prodId)
-    await Product.save()
-
-    res.status(200).json({
-      message: "Successfully Deleted Product",
-      data: prodInfo
-    })
-  } catch (error) {
-    res.status(400).json({message: "Error Occured"})
-  }
-}
-
 
 
 // FETCHING PRODUCTS
@@ -107,8 +58,8 @@ exports.postPurchaseProduct = async (req, res) => {
   const { productId } = req.params
 
   try {
-    const user = await User.findById(req.userId).populate('purchasedProducts'); 
-    // const user = await User.findById("65012f49674862d85782d14b").populate('purchasedProducts'); 
+    // const user = await User.findById(req.userId).populate('purchasedProducts'); 
+    const user = await User.findById("651ad7f0213272152351da98").populate('purchasedProducts'); 
     unAuthorized(user)
     
     const product = await Product.findById(productId)
@@ -126,7 +77,22 @@ exports.postPurchaseProduct = async (req, res) => {
       }
       user.purchasedDetails.push(existingProduct)
       user.purchasedProducts.push(product)
-      
+
+      const userParent = await User.findOne(
+        { referralCode: user.parentRef}
+      )
+      if(userParent){
+        // userParent will be null if parentRef of currently logged-in
+        // user isn't anybody's referralCode in the database
+        console.log("this user was actually referred")
+        // update referral count of existing user with this 
+        // user's parentRef matching its referralCode
+        await User.findOneAndUpdate(
+          {referralCode: user.parentRef}, 
+          { $inc: { referralCount: 1 }},
+          { returnOriginal: false}
+        )
+      }
       user.save()
       return jsonResp("Successfully Purchased Your First Product")
     }
@@ -205,31 +171,31 @@ exports.getPurchasedProducts = async (req, res) => {
 }
 
 exports.postTotalAmount = async (req, res) => {
-  const { purchasedProduct, totalAmount } = req.body;
+  const { productId, amount } = req.body;
 
   try {
-    const user = await User.findById(req.userId); 
+    // const user = await User.findById(req.userId); 
+    const user = await User.findById("65012f49674862d85782d14b"); 
     unAuthorized(user)
 
-    // Check if the product already exists in purchasedProducts
-    const existingProductIndex = user.purchasedProducts.findIndex(
-      (productObj) => productObj.productId === purchasedProduct.productId
-    );
-    if (existingProductIndex !== -1) {
-      // Update the total income of the purchased product
-      user.purchasedProducts[existingProductIndex].totalIncome = totalAmount;      
-      // Save the updated user document
-      await user.save();
-      return res.status(200).json({ 
-        message: 'Total amount posted successfully.' 
-      });
-    } else {
-      return res.status(404).json({ 
-        message: 'Product not found in purchased products.' 
-      });
-    }
+    const product = await Product.findById(productId)
+    noData(product)
+    
+    const updatedUser = await User.findOneAndUpdate(
+      { _id: user._id, 'purchasedDetails._id': product._id },
+      { $set: { 'purchasedDetails.$.amount': amount } },
+      { returnOriginal: false }
+    )
 
-  } catch (error) {
-    return res.status(500).json({ message: 'Error posting total amount.' });
+    return res.status(201).json({ 
+      message: 'Successfully Posted Amount',
+      data: updatedUser
+    });
+
+  } catch (err) {
+    return res.status(500).json({ 
+      message: 'Error posting total amount.',
+      info: err.message 
+    });
   }
 };
