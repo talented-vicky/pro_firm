@@ -39,7 +39,5 @@ app.listen(PORT, () => console.log(`Server is running on port ${PORT}`))
 // 926 by 113 => passage
 
 
-// --- first 4 products should not have referral condition 
-// for users to purchase them
-
-// ensure referral count reflects once someone is referred
+// --- fp3 and fp6 should have 30 days kini
+// referrals for first 4 should be 0

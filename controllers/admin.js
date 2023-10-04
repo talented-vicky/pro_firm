@@ -66,10 +66,10 @@ exports.deleteProduct = async (req, res) => {
 }
   
 exports.editProduct = async (req, res) => {
-    const { purchaseLimit } = req.body 
+    const { referrals } = req.body 
     try {
         const product = await Product.findOneAndUpdate(
-            { productPrice:  15000 }, { purchaseLimit },
+            { productTitle:  'F-p25' }, { referrals },
             { returnOriginal: false }
         )
         noData(product)
