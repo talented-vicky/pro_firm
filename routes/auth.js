@@ -1,12 +1,12 @@
 // backend/routes/authRoutes.js
 const express = require('express');
+const router = express.Router();
 const { body } = require('express-validator')
 
 
 const authController = require('../controllers/auth');
 const User = require('../models/user')
 
-const router = express.Router();
 
 
 // backend developer ---

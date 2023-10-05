@@ -3,10 +3,9 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const cors = require('cors'); // Import the cors package
 
+const adminRoutes = require('./routes/admin')
 const authRoutes = require('./routes/auth');
 const apiRoutes = require('./routes/api');
-const adminRoutes = require('./routes/admin')
-
 
 
 require('dotenv').config();
@@ -37,7 +36,3 @@ app.listen(PORT, () => console.log(`Server is running on port ${PORT}`))
 
 // 613 by 470 => reception
 // 926 by 113 => passage
-
-
-// --- fp3 and fp6 should have 30 days kini
-// referrals for first 4 should be 0

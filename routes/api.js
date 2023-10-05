@@ -1,19 +1,19 @@
 const express = require('express');
+const router = express.Router();
 
 const productCtrl = require('../controllers/product');
 const withdrawalCtrl = require('../controllers/withdrawal')
 const paymentCtrl = require('../controllers/payment')
 const verifyToken = require('../middleware/auth'); 
 
-const router = express.Router();
 
 
 // Protected route for products
-router.get('/products', productCtrl.getProducts);
+router.get('/products', verifyToken, productCtrl.getProducts);
 
 router.get('/products/:productId', verifyToken, productCtrl.getOneProduct);
 
-router.post('/products/:productId', productCtrl.postPurchaseProduct)
+router.post('/products/:productId', verifyToken, productCtrl.postPurchaseProduct)
 
 router.get('/product/purchased', verifyToken, productCtrl.getPurchasedProducts)
 
