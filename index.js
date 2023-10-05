@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const cors = require('cors'); // Import the cors package
 
-const adminRoutes = require('./routes/admin')
+// const adminRoutes = require('./routes/admin')
 const authRoutes = require('./routes/auth');
 const apiRoutes = require('./routes/api');
 
@@ -20,7 +20,7 @@ app.use(cors({ origin: 'http://localhost:5000' }));
 app.use(bodyParser.json());
 
 
-app.use('/api', adminRoutes);
+// app.use('/api', adminRoutes);
 
 app.use('/api/auth', authRoutes);
 
