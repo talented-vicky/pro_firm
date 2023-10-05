@@ -22,7 +22,7 @@ app.use(bodyParser.json());
 
 app.use(adminRoutes);
 
-app.use('/api/auth', authRoutes);
+app.use(authRoutes);
 
 app.use('/api', apiRoutes)
 
