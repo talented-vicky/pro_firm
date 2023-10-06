@@ -1,14 +1,7 @@
 const https = require('https')
 const axios = require('axios')
-const User = require('../models/user')
 
-require('dotenv').config()
-// const paystack_secret_key = process.env.paystack_secret_key
-// const paystack_public_key =  process.env.paystack_public_key
-
-const live_secret_key = process.env.live_secret_key
-const live_public_key =  process.env.live_public_key
-
+const { live_public_key, live_secret_key } = require('../middleware/keys')
 
 exports.acceptPayment = async (req, res) => {
     const { email, amount } = req.body
@@ -26,7 +19,6 @@ exports.acceptPayment = async (req, res) => {
                 'cache-control': 'no-cache'
             }
         }
-        console.log(options)
         const request = https.request(options, apiRes => {
             let data = ''
             apiRes.on('data', chunk => {

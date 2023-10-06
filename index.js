@@ -8,14 +8,12 @@ const authRoutes = require('./routes/auth');
 const apiRoutes = require('./routes/api');
 
 
-require('dotenv').config();
+const { PORT, CONNECTION_URL } = require('./middleware/keys')
 const app = express();
 
-const PORT = process.env.PORT || 5000;
-const CONNECTION_URL = process.env.CONNECTION_URL;
-
-// Enable CORS for requests from the frontend
-app.use(cors({ origin: 'http://localhost:5000' }));
+//
+// // Enable CORS for requests from the frontend
+// app.use(cors({ origin: 'http://localhost:5000' }));
 
 app.use(bodyParser.json());
 
@@ -26,6 +24,12 @@ app.use((req, res, next) => {
   next()
 })
 
+app.get('/', (req, res) => {
+  res.status(200).json({
+    message: "Welcome to Pro Firm Backend App",
+    notification: "Everything is working fine, You should NOT be here though"
+  })
+})
 
 app.use('/api', adminRoutes);
 
