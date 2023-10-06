@@ -3,8 +3,8 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const cors = require('cors'); // Import the cors package
 
-// const adminRoutes = require('./routes/admin')
-// const authRoutes = require('./routes/auth');
+const adminRoutes = require('./routes/admin')
+const authRoutes = require('./routes/auth');
 const apiRoutes = require('./routes/api');
 
 
@@ -31,11 +31,11 @@ app.get('/', (req, res) => {
   })
 })
 
-// app.use('/api', adminRoutes);
+app.use('/api', adminRoutes);
 
-// app.use('/api/auth', authRoutes);
+app.use('/api/auth', authRoutes);
 
-app.use(apiRoutes)
+app.use('/api', apiRoutes)
 
 mongoose.connect(CONNECTION_URL, {
   useNewUrlParser: true,
