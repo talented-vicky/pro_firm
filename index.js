@@ -12,8 +12,8 @@ const { PORT, CONNECTION_URL } = require('./middleware/keys')
 const app = express();
 
 //
-// // Enable CORS for requests from the frontend
-// app.use(cors({ origin: 'http://localhost:5000' }));
+// Enable CORS for requests from the frontend
+app.use(cors({ origin: 'http://localhost:5000' }));
 
 app.use(bodyParser.json());
 
@@ -31,11 +31,11 @@ app.get('/', (req, res) => {
   })
 })
 
-app.use('/api', adminRoutes);
+// app.use('/api', adminRoutes);
 
-app.use('/api/auth', authRoutes);
+// app.use('/api/auth', authRoutes);
 
-app.use('/api', apiRoutes)
+// app.use('/api', apiRoutes)
 
 mongoose.connect(CONNECTION_URL, {
   useNewUrlParser: true,
