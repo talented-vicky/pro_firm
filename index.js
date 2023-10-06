@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const cors = require('cors'); // Import the cors package
 
 // const adminRoutes = require('./routes/admin')
-const authRoutes = require('./routes/auth');
+// const authRoutes = require('./routes/auth');
 const apiRoutes = require('./routes/api');
 
 
@@ -33,9 +33,9 @@ app.get('/', (req, res) => {
 
 // app.use('/api', adminRoutes);
 
-app.use('/api/auth', authRoutes);
+// app.use('/api/auth', authRoutes);
 
-app.use('/api', apiRoutes)
+app.use(apiRoutes)
 
 mongoose.connect(CONNECTION_URL, {
   useNewUrlParser: true,
